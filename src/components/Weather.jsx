@@ -1,7 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+
 import './Weather.css'
 
+import { toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
 const Weather = () => {
+	const inputRef = useRef()
+
 	const [weatherData, setWeatherData] = useState(false)
 
 	const allIcons = {
@@ -22,17 +28,20 @@ const Weather = () => {
 		'13d': '/src/assets/images/snow.png',
 		'13n': '/src/assets/images/snow.png',
 		'50d': '/src/assets/images/humidity.png',
-		'50n': '/src/assets/images/humidity.png',
+		'50n': '/src/assets/images/humidity.png'
 	}
 
 	const fetchWeather = async (city) => {
+		if (city === '') {
+			return toast.error('Error! Please enter the city name.')
+		}
+
 		const apiKey = import.meta.env.VITE_API_KEY
 
 		const res = await fetch(
 			`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`
 		)
 		const data = await res.json()
-		console.log(data)
 
 		const icon = allIcons[data.weather[0].icon]
 
@@ -52,8 +61,11 @@ const Weather = () => {
 	return (
 		<div className='weather'>
 			<div className='search-bar'>
-				<input type='text' placeholder='Search' />
-				<img src='/src/assets/images/search.png' />
+				<input ref={inputRef} type='text' placeholder='Search' />
+				<img
+					src='/src/assets/images/search.png'
+					onClick={() => fetchWeather(inputRef.current.value)}
+				/>
 			</div>
 			<img src={weatherData.icon} className='weather-icon' />
 			<p className='temp'>{weatherData.temp}°C</p>
@@ -74,6 +86,7 @@ const Weather = () => {
 					</div>
 				</div>
 			</div>
+			<ToastContainer />
 		</div>
 	)
 }
